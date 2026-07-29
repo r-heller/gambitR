@@ -60,7 +60,17 @@ gm_openings <- function(query = NULL, eco = NULL) {
     if (!is.character(query) || length(query) != 1L || is.na(query)) {
       cli::cli_abort("{.arg query} must be a single non-NA string or {.code NULL}.")
     }
-    book <- book[grepl(query, book$name, ignore.case = TRUE), , drop = FALSE]
+    hits <- suppressWarnings(tryCatch(
+      grepl(query, book$name, ignore.case = TRUE),
+      error = function(e) {
+        cli::cli_abort(c(
+          "{.arg query} is not a valid regular expression.",
+          "x" = conditionMessage(e),
+          "i" = "Escape any regular expression metacharacters in the search text."
+        ))
+      }
+    ))
+    book <- book[hits, , drop = FALSE]
   }
   if (!is.null(eco)) {
     if (!is.character(eco) || length(eco) != 1L || is.na(eco)) {

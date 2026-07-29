@@ -159,7 +159,7 @@ gm_play <- function(white = "engine", black = "engine", position = NULL,
 .gm_repetition_key <- function(position) {
   paste(
     paste(position$board, collapse = ""), position$turn,
-    position$castling, position$ep %||% "-"
+    position$castling, if (is.na(position$ep)) "-" else position$ep
   )
 }
 

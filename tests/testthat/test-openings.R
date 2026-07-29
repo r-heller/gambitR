@@ -83,3 +83,7 @@ test_that("gm_identify_opening() returns zero rows when off book", {
 test_that("gm_identify_opening() validates its argument", {
   expect_error(gm_identify_opening(gm_position()), class = "rlang_error")
 })
+
+test_that("an invalid search pattern is reported clearly", {
+  expect_error(gm_openings("Gambit ("), "not a valid regular expression")
+})
