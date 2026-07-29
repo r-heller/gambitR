@@ -1,2 +1,29 @@
 :root { --gm-accent: #5E2C8E; }
+
 .navbar-brand { font-weight: 700; letter-spacing: .02em; }
+
+.gm-logo { margin: 0 .75rem; }
+
+.card-header {
+  font-weight: 600;
+  color: var(--gm-accent);
+  letter-spacing: .01em;
+}
+
+.btn-primary {
+  background-color: var(--gm-accent);
+  border-color: var(--gm-accent);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #4a2270;
+  border-color: #4a2270;
+}
+
+pre {
+  font-size: .85rem;
+  line-height: 1.4;
+}
+
+.shiny-plot-output { cursor: pointer; }
