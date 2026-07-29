@@ -13,3 +13,5 @@
 ^codecov\.yml$
 ^.*\.svg$
 ^\.lintr$
+^data-raw$
+^\.orchestration$

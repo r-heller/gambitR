@@ -74,9 +74,10 @@ gm_bestmove <- function(position, depth = 3L, engine = c("native", "uci"),
     if (score > alpha) alpha <- score
     if (verbose) cli::cli_progress_update(.envir = rlang::current_env())
   }
-  san <- .gm_san_all(st, lapply(mv, function(x) x[best_i]))
+  # SAN disambiguation is only correct when it can see the whole move list,
+  # so build it for every move and then pick the winner.
   tibble::tibble(
-    san = san,
+    san = .gm_san_all(st, mv)[[best_i]],
     score = if (st$turn == 1L) best else -best,
     depth = depth,
     nodes = counter$nodes

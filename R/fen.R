@@ -93,9 +93,10 @@ gm_read_fen <- function(fen, call = rlang::caller_env()) {
       } else if (tok %in% .GM_CHARS[-1L]) {
         row <- c(row, tok)
       } else {
+        known <- .GM_CHARS[-1L]
         cli::cli_abort(c(
           "Unknown character {.val {tok}} in the piece placement field.",
-          "i" = "Expected a digit 1-8 or one of {.val {.GM_CHARS[-1L]}}."
+          "i" = "Expected a digit 1-8 or one of {.val {known}}."
         ), call = call)
       }
     }
