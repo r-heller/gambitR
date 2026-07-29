@@ -112,6 +112,10 @@ test_that("the optional-dependency helpers fall back gracefully", {
   expect_true(inherits(gm_picker("x", "X", c("a", "b")), "shiny.tag"))
   expect_true(inherits(gm_toggle("x", "X"), "shiny.tag"))
   expect_type(gm_uci_available(), "logical")
+  expect_true(inherits(gm_chart_output("x"), "shiny.tag") ||
+    inherits(gm_chart_output("x"), "shiny.tag.list") ||
+    inherits(gm_chart_output("x"), "html_dependency") ||
+    !is.null(gm_chart_output("x")))
   expect_true(all(gm_puzzle_themes() %in% .gm_puzzle_set()$theme))
 })
 

@@ -104,6 +104,27 @@ gm_safe_board <- function(position, highlight = NULL, flip = FALSE) {
   )
 }
 
+# plotly is optional: the chart is interactive when it is installed and a
+# plain ggplot otherwise.
+gm_chart_output <- function(input_id, height = "320px") {
+  if (gm_have("plotly")) {
+    plotly::plotlyOutput(input_id, height = height)
+  } else {
+    shiny::plotOutput(input_id, height = height)
+  }
+}
+
+gm_render_chart <- function(build) {
+  if (gm_have("plotly")) {
+    plotly::renderPlotly({
+      plot <- build()
+      if (is.null(plot)) NULL else plotly::ggplotly(plot)
+    })
+  } else {
+    shiny::renderPlot(build())
+  }
+}
+
 # The bundled puzzle set is a plain rds, so the themes can be listed without
 # reaching into the package namespace.
 gm_puzzle_themes <- function() {

@@ -8,7 +8,7 @@ template:
 reference:
 - title: Core
   contents: [gm_position, is_gm_position, gm_read_fen, gm_write_fen,
-             gm_legal_moves, gm_move, gm_status, is_gm_game]
+             gm_legal_moves, gm_move, gm_status, gm_game, is_gm_game]
 - title: Analysis
   contents: [gm_evaluate, gm_bestmove, gm_uci_bestmove]
 - title: Play & Simulation
@@ -25,4 +25,4 @@ reference:
 articles:
 - title: Articles
   navbar: ~
-  contents: [gambitR]
+  contents: [gambitR, analysis, openings, puzzles]

@@ -8,12 +8,23 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 5,
+  fig.height = 5,
+  dpi = 96
+)
 ```
 
 ```{r setup}
 library(gambitR)
 ```
+
+gambitR is a self-contained chess toolkit written in plain R. Nothing outside
+R is required: move generation, notation, evaluation and search are all
+implemented in the package. This article walks the whole pipeline once, from a
+position to a finished game.
 
 ## A position
 
@@ -25,28 +36,174 @@ pos <- gm_position()
 pos
 ```
 
-## Legal moves
+Positions are read from and written to Forsyth-Edwards Notation, and the two
+are exact inverses of one another.
 
 ```{r}
-gm_legal_moves(pos)
+fen <- gm_write_fen(pos)
+fen
+identical(gm_write_fen(gm_read_fen(fen)), fen)
 ```
+
+Any legal position can be supplied directly.
+
+```{r}
+gm_position("r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4")
+```
+
+## Legal moves
+
+`gm_legal_moves()` enumerates every legal move, with standard algebraic
+notation already resolved, including disambiguation and check or mate
+suffixes.
+
+```{r}
+moves <- gm_legal_moves(pos)
+moves
+```
+
+The generator is verified against the published perft reference counts, so
+castling, en passant, promotion and pins are all handled exactly. Here is a
+position where exactly one en passant capture is legal:
+
+```{r}
+ep <- gm_position("rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3")
+subset(gm_legal_moves(ep), flag == "ep")
+```
+
+Moves are applied with `gm_move()`, which accepts standard algebraic notation
+or the long algebraic form an engine would use.
+
+```{r}
+gm_write_fen(gm_move(pos, "e4"))
+gm_write_fen(gm_move(pos, "e2e4"))
+```
+
+`gm_status()` reports the state of the game.
+
+```{r}
+fools_mate <- gm_position("rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3")
+gm_status(fools_mate)
+nrow(gm_legal_moves(fools_mate))
+```
+
+## Drawing a board
+
+`gm_plot_board()` returns a `ggplot2` object, so it composes with the rest of
+the grammar of graphics rather than drawing to a device itself.
+
+```{r}
+gm_plot_board(gm_move(pos, "e4"), highlight = c("e2", "e4"))
+```
+
+`autoplot()` dispatches to the same function, and `flip = TRUE` shows the
+board from Black's side.
+
+## Reading and writing PGN
+
+`gm_read_pgn()` parses header tags and movetext, strips comments, numeric
+annotation glyphs and variations, and replays the mainline through the
+generator. Here is Morphy's Opera Game.
+
+```{r}
+opera <- paste(
+  '[Event "Paris Opera"]',
+  '[White "Morphy, Paul"]',
+  '[Black "Duke Karl / Count Isouard"]',
+  '[Result "1-0"]',
+  "",
+  "1. e4 e5 2. Nf3 d6 3. d4 Bg4 {A dubious pin.} 4. dxe5 Bxf3 5. Qxf3 dxe5",
+  "6. Bc4 Nf6 7. Qb3 Qe7 8. Nc3 c6 9. Bg5 b5 10. Nxb5 cxb5 11. Bxb5+ Nbd7",
+  "12. O-O-O Rd8 13. Rxd7 Rxd7 14. Rd1 Qe6 15. Bxd7+ Nxd7 16. Qb8+ Nxb8",
+  "17. Rd8# 1-0",
+  sep = "\n"
+)
+
+game <- gm_read_pgn(opera, text = TRUE)
+game
+```
+
+Because every move was replayed, the final position really is mate.
+
+```{r}
+final <- game$positions[[length(game$positions)]]
+gm_status(final)
+```
+
+```{r}
+gm_plot_board(final)
+```
+
+`gm_write_pgn()` is the inverse, and round-trips the mainline.
+
+```{r}
+identical(gm_read_pgn(gm_write_pgn(game), text = TRUE)$moves, game$moves)
+```
+
+## Evaluation and search
+
+`gm_evaluate()` scores a position in centipawns from White's point of view,
+combining material, piece-square tables, mobility and pawn shelter. The
+starting position is symmetric, so it scores zero.
+
+```{r}
+gm_evaluate(gm_position())
+gm_evaluate(gm_position("rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
+```
+
+`gm_bestmove()` runs an alpha-beta search on top of that evaluation. It finds
+forced mates.
+
+```{r}
+gm_bestmove(gm_position("6k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1"),
+  depth = 2, verbose = FALSE
+)
+```
+
+If an external UCI engine such as Stockfish is on the `PATH`, `engine = "uci"`
+delegates to it through `gm_uci_bestmove()` instead. See the analysis article
+for details.
 
 ## Playing and simulating
 
-Pit two strategies against each other, or run a batch tournament.
-
-```{r eval = FALSE}
-game <- gm_play(white = "engine", black = "random")
-gm_simulate(white = "random", black = "random", n = 20)
-```
-
-## Analysis
-
-Static evaluation and engine search drive the analysis tools.
+`gm_play()` runs a whole game between two strategies, which may be the
+built-in shortcuts `"random"` and `"engine"` or any function that takes a
+position and returns a move.
 
 ```{r}
-gm_evaluate(pos)
+set.seed(2)
+played <- gm_play(white = "random", black = "random", max_moves = 30, verbose = FALSE)
+played
+played$tags$Termination
 ```
 
-See the other articles for the opening explorer, puzzle trainer, and the
-interactive Shiny application launched with `gm_run_app()`.
+`gm_simulate()` batches that into a tidy summary.
+
+```{r}
+set.seed(3)
+gm_simulate(white = "random", black = "random", n = 3, max_moves = 20, verbose = FALSE)
+```
+
+## Openings and puzzles
+
+The bundled ECO book and puzzle set drive the explorer and the trainer.
+
+```{r}
+head(gm_openings("Sicilian Defense")[, c("eco", "name")])
+gm_identify_opening(game)
+```
+
+```{r}
+puzzle <- gm_puzzle(id = "gm-0001")
+puzzle
+gm_check_solution(puzzle, puzzle$solution)
+```
+
+## Where to go next
+
+* `vignette("analysis", package = "gambitR")` for evaluation, search and the
+  UCI hook.
+* `vignette("openings", package = "gambitR")` for the opening explorer.
+* `vignette("puzzles", package = "gambitR")` for the puzzle trainer.
+* `gm_run_app()` launches the interactive study application, which puts all
+  six of these workflows behind one interface.

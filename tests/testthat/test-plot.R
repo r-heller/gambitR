@@ -5,14 +5,33 @@ test_that("gm_plot_board() returns a ggplot object", {
 
 test_that("the board plot has the expected layers", {
   plain <- gm_plot_board(gm_position())
-  expect_length(plain$layers, 2L)
+  expect_length(plain$layers, 3L)
   expect_s3_class(plain$layers[[1L]]$geom, "GeomTile")
-  expect_s3_class(plain$layers[[2L]]$geom, "GeomText")
+  expect_s3_class(plain$layers[[2L]]$geom, "GeomPoint")
+  expect_s3_class(plain$layers[[3L]]$geom, "GeomText")
+  expect_equal(nrow(plain$layers[[3L]]$data), 32L)
 
   marked <- gm_plot_board(gm_position(), highlight = c("e2", "e4"))
-  expect_length(marked$layers, 3L)
+  expect_length(marked$layers, 4L)
   expect_s3_class(marked$layers[[2L]]$geom, "GeomTile")
   expect_equal(nrow(marked$layers[[2L]]$data), 2L)
+
+  bare <- gm_plot_board(gm_position("8/8/4k3/8/8/4K3/8/8 w - - 0 1"))
+  expect_length(bare$layers, 3L)
+})
+
+test_that("the board renders on the pdf and postscript devices", {
+  # The U+2654-U+265F glyphs cannot be encoded there, which is why the plot
+  # uses lettered discs.
+  for (open in list(
+    function(f) grDevices::pdf(f),
+    function(f) grDevices::postscript(f)
+  )) {
+    path <- withr::local_tempfile()
+    open(path)
+    expect_silent(print(gm_plot_board(gm_position(), highlight = "e4")))
+    grDevices::dev.off()
+  }
 })
 
 test_that("the board grid is a full 64-square checkerboard", {
@@ -22,7 +41,11 @@ test_that("the board grid is a full 64-square checkerboard", {
   expect_equal(sum(data$shade == "dark"), 32L)
   expect_identical(data$shade[data$square == "a1"], "dark")
   expect_identical(data$shade[data$square == "h1"], "light")
-  expect_equal(sum(nzchar(data$glyph)), 32L)
+  expect_equal(sum(nzchar(data$piece)), 32L)
+  expect_identical(data$piece[data$square == "e1"], "K")
+  expect_identical(data$side[data$square == "e1"], "white")
+  expect_identical(data$side[data$square == "e8"], "black")
+  expect_true(is.na(data$side[data$square == "e4"]))
 })
 
 test_that("flipping mirrors the board", {
@@ -58,7 +81,7 @@ test_that("autoplot() dispatches to gm_plot_board()", {
   expect_s3_class(via_autoplot, "ggplot")
   expect_equal(nrow(via_autoplot$data), 64L)
   expect_equal(
-    length(ggplot2::autoplot(gm_position(), highlight = "e4")$layers), 3L
+    length(ggplot2::autoplot(gm_position(), highlight = "e4")$layers), 4L
   )
 })
 

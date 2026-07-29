@@ -4,6 +4,17 @@
 .GM_BOARD_LIGHT <- "#EFE6DC"
 .GM_BOARD_DARK <- "#B08D6A"
 .GM_ACCENT <- "#5E2C8E"
+.GM_PIECE_FILL <- c(white = "#FBF8F3", black = "#2B2B2B")
+.GM_PIECE_INK <- c(white = "#2B2B2B", black = "#F4F1EC")
+
+# Mix two colours without relying on device alpha support.
+#' @noRd
+.gm_blend <- function(top, bottom, weight) {
+  a <- grDevices::col2rgb(top)
+  b <- grDevices::col2rgb(bottom)
+  mixed <- weight * a[, rep(1L, ncol(b)), drop = FALSE] + (1 - weight) * b
+  grDevices::rgb(mixed[1L, ], mixed[2L, ], mixed[3L, ], maxColorValue = 255)
+}
 
 #' Plot a chess board
 #'
@@ -42,33 +53,54 @@ gm_plot_board <- function(position, highlight = NULL, flip = FALSE) {
     }
   }
   codes <- .gm_encode_board(position$board)
+  side <- ifelse(codes == 0L, NA_character_, ifelse(codes <= 6L, "white", "black"))
   squares <- tibble::tibble(
     square = .GM_SQUARES,
     file = if (flip) 9L - .GM_COL else .GM_COL,
     rank = if (flip) .GM_ROW else 9L - .GM_ROW,
     shade = ifelse((.GM_ROW + .GM_COL) %% 2L == 0L, "light", "dark"),
-    glyph = ifelse(codes == 0L, "", .GM_GLYPH[codes + 1L]),
+    piece = ifelse(codes == 0L, "", .GM_PIECE_LETTER[((codes - 1L) %% 6L) + 1L]),
+    side = side,
+    fill = ifelse(
+      (.GM_ROW + .GM_COL) %% 2L == 0L, .GM_BOARD_LIGHT, .GM_BOARD_DARK
+    ),
     marked = .GM_SQUARES %in% (highlight %||% character(0L))
   )
-  pieces <- squares[nzchar(squares$glyph), , drop = FALSE]
+  pieces <- squares[nzchar(squares$piece), , drop = FALSE]
+  if (nrow(pieces)) {
+    pieces$fill <- unname(.GM_PIECE_FILL[pieces$side])
+    pieces$ink <- unname(.GM_PIECE_INK[pieces$side])
+  }
   marks <- squares[squares$marked, , drop = FALSE]
 
+  # Pieces are drawn as lettered discs rather than the U+2654-U+265F glyphs:
+  # those characters cannot be encoded on the pdf and postscript devices, so a
+  # glyph board would fail wherever a Type 1 font is in play.
   plot <- ggplot2::ggplot(squares, ggplot2::aes(x = .data$file, y = .data$rank)) +
-    ggplot2::geom_tile(ggplot2::aes(fill = .data$shade), colour = NA) +
-    ggplot2::scale_fill_manual(
-      values = c(light = .GM_BOARD_LIGHT, dark = .GM_BOARD_DARK),
-      guide = "none"
-    )
+    ggplot2::geom_tile(ggplot2::aes(fill = .data$fill), colour = NA) +
+    ggplot2::scale_fill_identity(guide = "none")
   if (nrow(marks)) {
+    # Blend the accent into the square rather than layering a translucent
+    # tile: the postscript device has no alpha channel.
+    marks$fill <- .gm_blend(.GM_ACCENT, marks$fill, 0.45)
     plot <- plot + ggplot2::geom_tile(
-      data = marks, fill = .GM_ACCENT, alpha = 0.35, colour = NA
+      data = marks, ggplot2::aes(fill = .data$fill), colour = NA
     )
   }
+  if (nrow(pieces)) {
+    plot <- plot +
+      ggplot2::geom_point(
+        data = pieces, ggplot2::aes(fill = .data$fill),
+        shape = 21, size = 7, stroke = 0.7, colour = "grey25"
+      ) +
+      ggplot2::geom_text(
+        data = pieces,
+        ggplot2::aes(label = .data$piece, colour = .data$ink),
+        size = 3.4, fontface = "bold"
+      ) +
+      ggplot2::scale_colour_identity(guide = "none")
+  }
   plot +
-    ggplot2::geom_text(
-      data = pieces, ggplot2::aes(label = .data$glyph),
-      size = 9, colour = "grey10"
-    ) +
     ggplot2::scale_x_continuous(
       breaks = 1:8, labels = if (flip) rev(letters[1:8]) else letters[1:8],
       expand = ggplot2::expansion(0)

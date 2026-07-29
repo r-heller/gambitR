@@ -19,7 +19,7 @@ mod_simulate_ui <- function(id) {
       col_widths = c(6, 6),
       bslib::card(
         bslib::card_header("Outcomes"),
-        shiny::plotOutput(ns("chart"), height = "320px")
+        gm_chart_output(ns("chart"))
       ),
       bslib::card(
         bslib::card_header("Results"),
@@ -62,8 +62,10 @@ mod_simulate_server <- function(id, store = NULL) {
       )
     })
 
-    output$chart <- shiny::renderPlot({
-      shiny::req(rv$results)
+    chart <- function() {
+      if (is.null(rv$results)) {
+        return(NULL)
+      }
       tryCatch(
         {
           counts <- as.data.frame(
@@ -89,6 +91,8 @@ mod_simulate_server <- function(id, store = NULL) {
         },
         error = function(e) NULL
       )
-    })
+    }
+
+    output$chart <- gm_render_chart(chart)
   })
 }
