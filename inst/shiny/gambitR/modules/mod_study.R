@@ -8,36 +8,55 @@ mod_study_ui <- function(id) {
       shiny::helpText("Load a game, walk through it and add notes, then export the PGN."),
       shiny::textAreaInput(ns("pgn"), "PGN", value = "", rows = 5),
       shiny::actionButton(ns("load"), "Load PGN", class = "btn-primary w-100"),
-      shiny::actionButton(ns("from_play"), "Take game from Play tab", class = "w-100 mt-2"),
+      shiny::actionButton(
+        ns("from_play"), "Take game from Play tab",
+        class = "btn-outline-secondary w-100 mt-2"
+      ),
       shiny::hr(),
       shiny::textInput(ns("san"), "Add a move", placeholder = "e4"),
-      shiny::actionButton(ns("add"), "Add", class = "w-100"),
+      shiny::actionButton(ns("add"), "Add", class = "btn-outline-secondary w-100"),
       shiny::hr(),
       shiny::textInput(ns("event"), "Event", value = "gambitR study"),
       shiny::textInput(ns("white"), "White", value = "?"),
       shiny::textInput(ns("black"), "Black", value = "?"),
-      shiny::downloadButton(ns("download"), "Download PGN", class = "w-100")
+      shiny::downloadButton(
+        ns("download"), "Download PGN",
+        class = "btn-outline-secondary w-100"
+      )
     ),
     bslib::layout_columns(
       col_widths = c(6, 6),
-      bslib::card(
-        bslib::card_header("Position"),
-        shiny::plotOutput(ns("board"), height = "420px"),
-        shiny::sliderInput(ns("ply"), "Ply", min = 0L, max = 0L, value = 0L, step = 1L),
-        shiny::actionButton(ns("prev"), "Previous"),
-        shiny::actionButton(ns("next_ply"), "Next")
-      ),
-      bslib::layout_columns(
-        col_widths = 12,
-        bslib::card(
-          bslib::card_header("Annotation for this ply"),
-          shiny::textAreaInput(ns("note"), NULL, value = "", rows = 3),
-          shiny::actionButton(ns("save_note"), "Save note")
-        ),
-        bslib::card(
-          bslib::card_header("Game"),
-          shiny::verbatimTextOutput(ns("pgn_out"))
+      gm_board_card(
+        "Position", ns("board"), height = "470px",
+        shiny::div(
+          class = "gm-ply-bar",
+          shiny::div(
+            class = "gm-nav-group",
+            shiny::actionButton(
+              ns("prev"), "Previous",
+              class = "btn-outline-secondary btn-sm"
+            ),
+            shiny::actionButton(
+              ns("next_ply"), "Next",
+              class = "btn-outline-secondary btn-sm"
+            )
+          ),
+          shiny::sliderInput(
+            ns("ply"), NULL,
+            min = 0L, max = 0L, value = 0L, step = 1L,
+            ticks = FALSE, width = "100%"
+          )
         )
+      ),
+      gm_stack(
+        gm_text_card(
+          "Annotation for this ply",
+          shiny::textAreaInput(ns("note"), NULL, value = "", rows = 3),
+          shiny::div(
+            shiny::actionButton(ns("save_note"), "Save note", class = "btn-primary")
+          )
+        ),
+        gm_text_card("Game", shiny::uiOutput(ns("pgn_out")))
       )
     )
   )
@@ -154,26 +173,42 @@ mod_study_server <- function(id, store = NULL) {
       out
     })
 
-    output$board <- shiny::renderPlot({
-      shiny::req(length(rv$positions) > 0L)
-      index <- min(rv$ply + 1L, length(rv$positions))
-      gm_safe_board(rv$positions[[index]])
-    })
+    output$board <- shiny::renderPlot(
+      {
+        shiny::req(length(rv$positions) > 0L)
+        index <- min(rv$ply + 1L, length(rv$positions))
+        gm_safe_board(rv$positions[[index]])
+      },
+      res = 96
+    )
 
-    output$pgn_out <- shiny::renderText({
+    # The status line is chrome, the PGN is the document: keep them apart
+    # instead of pasting the message into the middle of the export.
+    output$pgn_out <- shiny::renderUI({
       tryCatch(
         {
           pgn <- gambitR::gm_write_pgn(game())
           notes <- rv$notes[nzchar(rv$notes)]
-          paste(
-            c(
-              rv$message, "", pgn,
-              if (length(notes)) c("Notes:", notes)
+          shiny::tagList(
+            shiny::div(
+              class = "gm-meta mb-2",
+              paste0(
+                rv$message, "  ·  ply ", rv$ply, " of ", length(rv$moves)
+              )
             ),
-            collapse = "\n"
+            shiny::tags$pre(class = "gm-scroll", pgn),
+            if (length(notes)) {
+              shiny::tagList(
+                shiny::div(class = "gm-subhead mt-3", "Notes"),
+                shiny::tags$ul(
+                  class = "gm-notes",
+                  lapply(notes, shiny::tags$li)
+                )
+              )
+            }
           )
         },
-        error = function(e) conditionMessage(e)
+        error = function(e) gm_empty(conditionMessage(e))
       )
     })
 

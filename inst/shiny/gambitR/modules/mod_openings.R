@@ -1,5 +1,9 @@
 # Module: openings - explore the bundled ECO book.
 
+# How many book lines the table shows at once. The ECO book has a few hundred
+# entries and a card is not a spreadsheet.
+.gm_openings_shown <- 40L
+
 mod_openings_ui <- function(id) {
   ns <- shiny::NS(id)
   bslib::layout_sidebar(
@@ -9,19 +13,22 @@ mod_openings_ui <- function(id) {
       shiny::textInput(ns("query"), "Name contains", placeholder = "Sicilian"),
       shiny::textInput(ns("eco"), "ECO code starts with", placeholder = "B2"),
       shiny::selectInput(ns("line"), "Line", choices = character(0L)),
-      shiny::sliderInput(ns("ply"), "Ply", min = 0L, max = 0L, value = 0L, step = 1L),
+      shiny::sliderInput(
+        ns("ply"), "Ply",
+        min = 0L, max = 0L, value = 0L, step = 1L, ticks = FALSE
+      ),
       gm_toggle(ns("flip"), "Flip board")
     ),
     bslib::layout_columns(
       col_widths = c(5, 7),
-      bslib::card(
-        bslib::card_header("Board"),
-        shiny::plotOutput(ns("board"), height = "420px"),
-        shiny::verbatimTextOutput(ns("line_moves"))
+      gm_stack(
+        gm_board_card("Board", ns("board"), height = "440px"),
+        gm_text_card("Line", shiny::uiOutput(ns("line_moves")))
       ),
-      bslib::card(
-        bslib::card_header("Matching openings"),
-        shiny::tableOutput(ns("table"))
+      gm_text_card(
+        "Matching openings",
+        shiny::uiOutput(ns("table_note")),
+        shiny::div(class = "gm-table-scroll", shiny::tableOutput(ns("table")))
       )
     )
   )
@@ -93,34 +100,73 @@ mod_openings_server <- function(id, store = NULL) {
       }
     })
 
-    output$board <- shiny::renderPlot({
-      shiny::req(rv$position)
-      gm_safe_board(rv$position, flip = isTRUE(input$flip))
-    })
+    output$board <- shiny::renderPlot(
+      {
+        shiny::req(rv$position)
+        gm_safe_board(rv$position, flip = isTRUE(input$flip))
+      },
+      res = 96
+    )
 
-    output$line_moves <- shiny::renderText({
+    output$line_moves <- shiny::renderUI({
       tryCatch(
         {
           hit <- selected()
-          paste0(
-            hit$eco[[1L]], "  ", hit$name[[1L]], "\n",
-            gm_movetext(line_moves())
+          moves <- line_moves()
+          ply <- min(input$ply %|OR|% length(moves), length(moves))
+          shiny::tagList(
+            shiny::div(class = "gm-status", hit$name[[1L]]),
+            shiny::div(
+              class = "gm-meta mt-1",
+              paste0(
+                "ECO ", hit$eco[[1L]], " · ", length(moves),
+                " half-move", if (length(moves) == 1L) "" else "s",
+                " · showing ", ply
+              )
+            ),
+            shiny::tags$pre(class = "mt-2", gm_movetext(moves))
           )
         },
-        error = function(e) ""
+        error = function(e) gm_empty("No line selected.")
       )
     })
 
-    output$table <- shiny::renderTable({
-      tryCatch(
-        {
-          book <- matches()
-          shiny::req(nrow(book) > 0L)
-          out <- book[, c("eco", "name", "moves")]
-          utils::head(out, 40L)
-        },
-        error = function(e) NULL
+    # The table is capped so the card stays usable; say so rather than
+    # truncating in silence.
+    output$table_note <- shiny::renderUI({
+      book <- tryCatch(matches(), error = function(e) NULL)
+      total <- if (is.null(book)) 0L else nrow(book)
+      if (total == 0L) {
+        return(gm_empty("No opening matches that search."))
+      }
+      shiny::div(
+        class = "gm-meta mb-2",
+        if (total > .gm_openings_shown) {
+          paste0(
+            "First ", .gm_openings_shown, " of ", total,
+            " matching lines. Narrow the search to see the rest."
+          )
+        } else {
+          paste0(total, " matching line", if (total == 1L) "" else "s", ".")
+        }
       )
     })
+
+    output$table <- shiny::renderTable(
+      {
+        tryCatch(
+          {
+            book <- matches()
+            shiny::req(nrow(book) > 0L)
+            out <- utils::head(book[, c("eco", "name", "moves")], .gm_openings_shown)
+            names(out) <- c("ECO", "Opening", "Moves")
+            out
+          },
+          error = function(e) NULL
+        )
+      },
+      striped = TRUE, hover = TRUE, spacing = "xs", width = "100%",
+      align = "lll"
+    )
   })
 }

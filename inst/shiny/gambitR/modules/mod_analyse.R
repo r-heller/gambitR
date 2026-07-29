@@ -8,32 +8,28 @@ mod_analyse_ui <- function(id) {
       shiny::helpText("Paste a FEN or a PGN, or pull in the game from the Play tab."),
       shiny::textAreaInput(
         ns("input_text"), "FEN or PGN",
-        value = "", rows = 6,
+        value = "", rows = 5,
         placeholder = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
       ),
       shiny::actionButton(ns("load"), "Load", class = "btn-primary w-100"),
-      shiny::actionButton(ns("from_play"), "Take game from Play tab", class = "w-100 mt-2"),
+      shiny::actionButton(
+        ns("from_play"), "Take game from Play tab",
+        class = "btn-outline-secondary w-100 mt-2"
+      ),
       shiny::hr(),
-      shiny::sliderInput(ns("depth"), "Search depth", min = 1L, max = 3L, value = 2L),
+      shiny::sliderInput(
+        ns("depth"), "Search depth",
+        min = 1L, max = 3L, value = 2L, step = 1L, ticks = FALSE
+      ),
       gm_toggle(ns("uci"), "Use external UCI engine"),
-      shiny::helpText(shiny::textOutput(ns("uci_note")))
+      shiny::div(class = "gm-meta", shiny::textOutput(ns("uci_note")))
     ),
     bslib::layout_columns(
       col_widths = c(5, 7),
-      bslib::card(
-        bslib::card_header("Position"),
-        shiny::plotOutput(ns("board"), height = "420px")
-      ),
-      bslib::layout_columns(
-        col_widths = 12,
-        bslib::card(
-          bslib::card_header("Evaluation"),
-          shiny::verbatimTextOutput(ns("eval"))
-        ),
-        bslib::card(
-          bslib::card_header("Evaluation curve"),
-          shiny::plotOutput(ns("curve"), height = "240px")
-        )
+      gm_board_card("Position", ns("board"), height = "460px"),
+      gm_stack(
+        gm_text_card("Evaluation", shiny::uiOutput(ns("eval"))),
+        gm_text_card("Evaluation curve", shiny::uiOutput(ns("curve_ui")))
       )
     )
   )
@@ -111,42 +107,60 @@ mod_analyse_server <- function(id, store = NULL) {
       )
     })
 
-    output$board <- shiny::renderPlot({
-      shiny::req(rv$position)
-      gm_safe_board(rv$position)
-    })
+    output$board <- shiny::renderPlot(
+      {
+        shiny::req(rv$position)
+        gm_safe_board(rv$position)
+      },
+      res = 96
+    )
 
-    output$eval <- shiny::renderText({
+    output$eval <- shiny::renderUI({
       shiny::req(rv$position)
       tryCatch(
         {
           static <- gambitR::gm_evaluate(rv$position)
           line <- best()
-          paste(
-            c(
-              rv$note,
-              paste0("Status: ", gm_status_text(rv$position)),
-              paste0("Static evaluation: ", round(static), " cp"),
-              if (!is.null(line) && !is.na(line$san)) {
-                paste0(
-                  "Best move: ", line$san, " (", round(line$score), " cp, depth ",
-                  line$depth, ")"
-                )
-              } else {
-                "Best move: none (the game is over)"
-              }
-            ),
-            collapse = "\n"
+          shiny::tagList(
+            shiny::div(class = "gm-status", gm_status_text(rv$position)),
+            shiny::tags$pre(paste(
+              c(
+                paste0("Static evaluation   ", sprintf("%+d cp", round(static))),
+                if (!is.null(line) && !is.na(line$san)) {
+                  paste0(
+                    "Best move           ", line$san,
+                    "  (", sprintf("%+d", round(line$score)), " cp, depth ",
+                    line$depth, ")"
+                  )
+                } else {
+                  "Best move           none — the game is over"
+                }
+              ),
+              collapse = "\n"
+            )),
+            shiny::div(class = "gm-meta mt-2", rv$note)
           )
         },
-        error = function(e) conditionMessage(e)
+        error = function(e) gm_empty(conditionMessage(e))
       )
     })
 
-    output$curve <- shiny::renderPlot({
-      shiny::req(rv$game)
-      shiny::req(length(rv$game$moves) > 0L)
-      tryCatch(gambitR::gm_plot_eval(rv$game), error = function(e) NULL)
+    output$curve_ui <- shiny::renderUI({
+      ns <- session$ns
+      if (is.null(rv$game) || !length(rv$game$moves)) {
+        gm_empty("Load a PGN, or take the game from the Play tab, to see the curve.")
+      } else {
+        shiny::plotOutput(ns("curve"), height = "300px")
+      }
     })
+
+    output$curve <- shiny::renderPlot(
+      {
+        shiny::req(rv$game)
+        shiny::req(length(rv$game$moves) > 0L)
+        gm_safe_eval(rv$game)
+      },
+      res = 96
+    )
   })
 }

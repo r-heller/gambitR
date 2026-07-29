@@ -18,8 +18,17 @@ gm_plot_board(position, highlight = NULL, flip = FALSE)
 A \code{ggplot2} object.
 }
 \description{
-Render a position as a \code{ggplot2} object: an 8x8 board with unicode piece
-glyphs. Returns the plot for further customisation; never draws directly.
+Render a position as a \code{ggplot2} object: an 8x8 board with the pieces drawn
+as vector shapes. Returns the plot for further customisation; never draws
+directly. Drop the annotations with
+\code{gm_plot_board(p) + ggplot2::labs(title = NULL, subtitle = NULL)}, or add the
+\code{FEN} yourself with
+\code{gm_plot_board(p) + ggplot2::labs(caption = gm_write_fen(p))}.
+}
+\details{
+The pieces are polygons rather than text, so they scale with the square and
+stay legible from a 2-inch figure to a full page, and the board renders on
+every graphics device including pdf and postscript.
 }
 \examples{
 gm_plot_board(gm_position())

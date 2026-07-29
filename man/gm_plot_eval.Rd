@@ -15,12 +15,15 @@ gm_plot_eval(game, depth = 1L)
 A \code{ggplot2} object with move number on x and centipawn score on y.
 }
 \description{
-Visualise how the static evaluation changes across the moves of a game.
+Visualise how the evaluation changes across the moves of a game. The area
+between the curve and the axis is filled towards whichever side is ahead,
+split exactly at the ply where the advantage changes hands.
 }
 \details{
 With \code{depth = 1} each position is scored by \code{\link[=gm_evaluate]{gm_evaluate()}}. A larger
 \code{depth} re-scores every position with \code{\link[=gm_bestmove]{gm_bestmove()}}, which is far slower
-but accounts for tactics.
+but accounts for tactics. Forced mates are clamped for display so a single
+mate score cannot flatten the rest of the curve.
 }
 \examples{
 \donttest{

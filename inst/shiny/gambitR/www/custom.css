@@ -1,13 +1,153 @@
-:root { --gm-accent: #5E2C8E; }
+:root {
+  --gm-accent: #5E2C8E;
+  --gm-accent-dark: #46216A;
+  --gm-accent-soft: #F1ECF7;
+  --gm-ink: #332F2B;
+  --gm-muted: #7A736C;
+  --gm-line: #E4E0DA;
+  --gm-board: #B48762;
+}
 
-.navbar-brand { font-weight: 700; letter-spacing: .02em; }
+body {
+  background-color: #FBFAF8;
+  color: var(--gm-ink);
+}
 
-.gm-logo { margin: 0 .75rem; }
+/* ---------------------------------------------------------------- navbar */
+
+.navbar {
+  background-color: #FFFFFF !important;
+  border-bottom: 1px solid var(--gm-line);
+  box-shadow: inset 0 -3px 0 0 var(--gm-accent);
+  padding-top: .35rem;
+  padding-bottom: .35rem;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: var(--gm-accent) !important;
+  font-size: 1.25rem;
+}
+
+.navbar .nav-link {
+  color: var(--gm-muted) !important;
+  font-weight: 500;
+  letter-spacing: .01em;
+  padding-left: .85rem !important;
+  padding-right: .85rem !important;
+}
+
+.navbar .nav-link:hover {
+  color: var(--gm-ink) !important;
+}
+
+.navbar .nav-link.active {
+  color: var(--gm-accent) !important;
+  font-weight: 600;
+}
+
+.gm-logo {
+  margin: 0 .5rem 0 1rem;
+  opacity: .9;
+}
+
+/* ----------------------------------------------------------------- cards */
+
+.card {
+  border: 1px solid var(--gm-line);
+  border-radius: .5rem;
+  box-shadow: 0 1px 2px rgba(51, 47, 43, .04);
+}
 
 .card-header {
+  background-color: transparent;
+  border-bottom: 1px solid var(--gm-line);
   font-weight: 600;
+  font-size: .78rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
   color: var(--gm-accent);
-  letter-spacing: .01em;
+  padding-top: .6rem;
+  padding-bottom: .6rem;
+}
+
+.gm-board-card .card-body {
+  padding: .35rem;
+}
+
+/* A column of cards that hug their content instead of being stretched to a
+   common height by the surrounding grid. */
+.gm-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bslib-spacer, 1rem);
+  align-content: start;
+}
+
+/* Long tables scroll inside their card rather than being cut off by it. The
+   scrollbar track is always drawn: without it a row clipped at the container
+   edge reads as a layout bug rather than as more content below. */
+.gm-table-scroll {
+  max-height: 620px;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+  border-bottom: 1px solid var(--gm-line);
+}
+
+.gm-table-scroll thead th {
+  position: sticky;
+  top: 0;
+  background-color: #FFFFFF;
+  z-index: 1;
+}
+
+/* ------------------------------------------------------------- sidebar */
+
+.bslib-sidebar-layout > .sidebar {
+  background-color: #F6F4F1;
+  border-right: 1px solid var(--gm-line);
+}
+
+/* The collapse toggle floats over the top-right corner of the sidebar, so the
+   first block of help text needs room or the chevron lands on a word. */
+.bslib-sidebar-layout > .sidebar .sidebar-content {
+  padding-top: .5rem;
+}
+
+.bslib-sidebar-layout > .sidebar .sidebar-content > .help-block:first-child,
+.bslib-sidebar-layout > .sidebar .sidebar-content > .shiny-html-output:first-child {
+  padding-right: 1.5rem;
+}
+
+.form-label,
+.shiny-input-container > label,
+.control-label {
+  font-weight: 600;
+  font-size: .8rem;
+  letter-spacing: .02em;
+  color: var(--gm-ink);
+  margin-bottom: .25rem;
+}
+
+.help-block,
+.shiny-input-container .help-block {
+  color: var(--gm-muted);
+  font-size: .82rem;
+  line-height: 1.45;
+}
+
+hr {
+  border-color: var(--gm-line);
+  opacity: 1;
+  margin: .9rem 0;
+}
+
+/* ------------------------------------------------------------- controls */
+
+.btn {
+  font-weight: 500;
+  border-radius: .375rem;
 }
 
 .btn-primary {
@@ -16,14 +156,169 @@
 }
 
 .btn-primary:hover,
-.btn-primary:focus {
-  background-color: #4a2270;
-  border-color: #4a2270;
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: var(--gm-accent-dark) !important;
+  border-color: var(--gm-accent-dark) !important;
+}
+
+/* shiny::actionButton() emits `btn btn-default`, so every rule for the quiet
+   buttons has to exclude the accented ones or it wins on source order. */
+.btn-outline-secondary,
+.btn-default:not(.btn-primary) {
+  color: var(--gm-ink);
+  border-color: var(--gm-line);
+  background-color: #FFFFFF;
+}
+
+.btn-outline-secondary:hover,
+.btn-default:not(.btn-primary):hover {
+  background-color: var(--gm-accent-soft);
+  border-color: var(--gm-accent);
+  color: var(--gm-accent-dark);
+}
+
+.btn-primary,
+.btn-primary:not(:disabled):not(.disabled) {
+  color: #FFFFFF;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--gm-accent);
+  box-shadow: 0 0 0 .18rem rgba(94, 44, 142, .15);
+}
+
+.irs--shiny .irs-bar,
+.irs--shiny .irs-handle > i:first-child,
+.irs--shiny .irs-single,
+.irs--shiny .irs-from,
+.irs--shiny .irs-to {
+  background-color: var(--gm-accent);
+  border-color: var(--gm-accent);
+}
+
+.irs--shiny .irs-single::before {
+  border-top-color: var(--gm-accent);
+}
+
+.irs--shiny .irs-min,
+.irs--shiny .irs-max {
+  background: transparent;
+  color: var(--gm-muted);
+}
+
+/* --------------------------------------------------------------- output */
+
+pre,
+.shiny-text-output.noplaceholder,
+code {
+  font-size: .82rem;
+  line-height: 1.5;
 }
 
 pre {
-  font-size: .85rem;
-  line-height: 1.4;
+  background-color: #F6F4F1;
+  border: 1px solid var(--gm-line);
+  border-radius: .375rem;
+  padding: .6rem .7rem;
+  color: var(--gm-ink);
+  margin-bottom: 0;
 }
 
-.shiny-plot-output { cursor: pointer; }
+.gm-empty {
+  color: var(--gm-muted);
+  font-size: .85rem;
+  font-style: italic;
+  padding: 1.4rem .2rem;
+  text-align: center;
+}
+
+.gm-status {
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--gm-ink);
+}
+
+.gm-scroll {
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+table.table,
+.shiny-table {
+  font-size: .85rem;
+  margin-bottom: 0;
+}
+
+.shiny-table th {
+  border-top: 0;
+  border-bottom: 2px solid var(--gm-line) !important;
+  color: var(--gm-muted);
+  font-weight: 600;
+  font-size: .74rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.shiny-table td {
+  border-color: var(--gm-line) !important;
+}
+
+.shiny-plot-output {
+  cursor: pointer;
+}
+
+.gm-meta {
+  color: var(--gm-muted);
+  font-size: .8rem;
+}
+
+.gm-subhead {
+  font-size: .74rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gm-muted);
+}
+
+.gm-solved {
+  color: var(--gm-accent);
+}
+
+.gm-notes {
+  padding-left: 1.1rem;
+  margin-bottom: 0;
+  font-size: .85rem;
+}
+
+/* ------------------------------------------------------- ply navigation */
+
+.gm-ply-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .5rem .5rem 0 .5rem;
+}
+
+.gm-nav-group {
+  display: flex;
+  gap: .4rem;
+  flex: 0 0 auto;
+}
+
+.gm-nav-group .btn {
+  min-width: 5.25rem;
+}
+
+/* The slider takes the rest of the bar and drops the label gap it would
+   otherwise reserve for a title it has not been given. */
+.gm-ply-bar .shiny-input-container {
+  flex: 1 1 auto;
+  margin-bottom: 0;
+  min-width: 8rem;
+}
+
+.gm-ply-bar .irs {
+  margin-bottom: 0;
+}

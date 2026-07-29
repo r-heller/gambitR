@@ -13,7 +13,26 @@ for (.f in sort(list.files(.module_dir, pattern = "\\.R$", full.names = TRUE))) 
 
 ui <- bslib::page_navbar(
   title = "gambitR",
-  theme = bslib::bs_theme(version = 5, primary = gm_accent),
+  window_title = "gambitR chess study",
+  # Not fillable: a chess board is a fixed square, so the panels have to size
+  # to their content. A filling layout stretches every card to the viewport
+  # and leaves a few hundred pixels of dead space around each board.
+  fillable = FALSE,
+  theme = bslib::bs_theme(
+    version = 5,
+    primary = gm_accent,
+    "border-color" = "#E4E0DA",
+    "body-color" = "#332F2B",
+    # System fonts only: the app must work offline and must not call out to a
+    # font CDN on the user's behalf.
+    base_font = bslib::font_collection(
+      "system-ui", "-apple-system", "Segoe UI", "Helvetica Neue", "Arial",
+      "sans-serif"
+    ),
+    code_font = bslib::font_collection(
+      "SFMono-Regular", "Menlo", "Consolas", "Liberation Mono", "monospace"
+    )
+  ),
   header = shiny::tags$head(
     shiny::tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
   ),
@@ -26,7 +45,7 @@ ui <- bslib::page_navbar(
   bslib::nav_spacer(),
   bslib::nav_item(
     shiny::tags$img(
-      src = "logo.png", height = "34px", alt = "gambitR",
+      src = "logo.png", height = "30px", alt = "gambitR",
       class = "gm-logo"
     )
   )

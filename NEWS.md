@@ -28,5 +28,7 @@
   set of 16 positions.
 
 ### Visualization & app
-* `gm_plot_board()`, `gm_plot_eval()`: ggplot2 board and evaluation plots.
+* `gm_plot_board()`, `gm_plot_eval()`: ggplot2 board and evaluation plots. The
+  pieces are drawn as vector shapes rather than as text, so a board scales with
+  the figure and renders on every device, including pdf and postscript.
 * `gm_run_app()`: interactive Shiny study application (Play, Analyse, Simulate, Openings, Puzzles, Study).

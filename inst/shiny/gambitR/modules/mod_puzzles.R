@@ -7,28 +7,27 @@ mod_puzzles_ui <- function(id) {
       width = 300,
       shiny::helpText("Find the move. Click the pieces or type algebraic notation."),
       shiny::selectInput(ns("theme"), "Theme", choices = c("any")),
-      shiny::actionButton(ns("new"), "New puzzle", class = "btn-primary w-100"),
+      shiny::actionButton(
+        ns("new"), "New puzzle",
+        class = "btn-outline-secondary w-100"
+      ),
       shiny::hr(),
       shiny::textInput(ns("san"), "Your move", placeholder = "Ra8#"),
-      shiny::actionButton(ns("submit"), "Submit", class = "w-100"),
-      shiny::actionButton(ns("hint"), "Show solution", class = "w-100 mt-2")
+      shiny::actionButton(ns("submit"), "Submit", class = "btn-primary w-100"),
+      shiny::actionButton(
+        ns("hint"), "Show solution",
+        class = "btn-outline-secondary w-100 mt-2"
+      )
     ),
     bslib::layout_columns(
       col_widths = c(6, 6),
-      bslib::card(
-        bslib::card_header("Puzzle"),
-        shiny::plotOutput(ns("board"), click = ns("board_click"), height = "420px")
+      gm_board_card(
+        "Puzzle", ns("board"),
+        click = ns("board_click"), height = "470px"
       ),
-      bslib::layout_columns(
-        col_widths = 12,
-        bslib::card(
-          bslib::card_header("Feedback"),
-          shiny::verbatimTextOutput(ns("feedback"))
-        ),
-        bslib::card(
-          bslib::card_header("Progress"),
-          shiny::tableOutput(ns("progress"))
-        )
+      gm_stack(
+        gm_text_card("This puzzle", shiny::uiOutput(ns("progress"))),
+        gm_text_card("Feedback", shiny::uiOutput(ns("feedback")))
       )
     )
   )
@@ -64,10 +63,11 @@ mod_puzzles_server <- function(id, store = NULL) {
       rv$position <- puzzle$position
       rv$attempt <- character(0L)
       rv$selected <- NULL
-      rv$note <- paste0(
-        "Theme ", puzzle$theme, ", rating ", puzzle$rating, ". ",
-        length(puzzle$solution), " move(s) to find."
-      )
+      rv$note <- if (length(puzzle$solution) == 1L) {
+        "Find the move."
+      } else {
+        paste0("Find the first of ", length(puzzle$solution), " moves.")
+      }
       invisible(NULL)
     }
 
@@ -107,9 +107,9 @@ mod_puzzles_server <- function(id, store = NULL) {
       }
       result <- gambitR::gm_check_solution(rv$puzzle, rv$attempt)
       rv$note <- if (isTRUE(result$correct)) {
-        "Solved."
+        "Solved. Draw another puzzle."
       } else {
-        paste0("Correct so far (", result$solved_plies, "/", result$total_plies, ").")
+        "Correct so far. Keep going."
       }
       invisible(NULL)
     }
@@ -148,41 +148,58 @@ mod_puzzles_server <- function(id, store = NULL) {
       submit(san)
     })
 
-    output$board <- shiny::renderPlot({
-      shiny::req(rv$position)
-      gm_safe_board(rv$position, highlight = rv$selected)
-    })
+    output$board <- shiny::renderPlot(
+      {
+        shiny::req(rv$position)
+        gm_safe_board(rv$position, highlight = rv$selected)
+      },
+      res = 96
+    )
 
-    output$feedback <- shiny::renderText({
+    output$feedback <- shiny::renderUI({
       tryCatch(
         {
           shiny::req(rv$puzzle)
-          paste(
-            c(
-              paste0("Puzzle ", rv$puzzle$id),
-              gm_status_text(rv$position),
-              rv$note,
-              if (length(rv$attempt)) paste0("Played: ", paste(rv$attempt, collapse = " "))
-            ),
-            collapse = "\n"
+          shiny::tagList(
+            shiny::div(class = "gm-status", rv$note),
+            if (length(rv$attempt)) {
+              shiny::div(
+                class = "gm-meta mt-1",
+                paste0("Played: ", paste(rv$attempt, collapse = " "))
+              )
+            }
           )
         },
-        error = function(e) "No puzzle loaded."
+        error = function(e) gm_empty("No puzzle loaded.")
       )
     })
 
-    output$progress <- shiny::renderTable({
-      shiny::req(rv$puzzle)
+    # The solution checker returns machine fields; the panel reads them out in
+    # words. Raw `correct / solved_plies / total_plies` is not a user interface.
+    output$progress <- shiny::renderUI({
       tryCatch(
         {
+          shiny::req(rv$puzzle)
           result <- gambitR::gm_check_solution(rv$puzzle, rv$attempt)
-          data.frame(
-            correct = result$correct,
-            solved_plies = as.integer(result$solved_plies),
-            total_plies = as.integer(result$total_plies)
+          solved <- as.integer(result$solved_plies)
+          total <- as.integer(result$total_plies)
+          shiny::tagList(
+            shiny::div(
+              class = if (isTRUE(result$correct)) "gm-status gm-solved" else "gm-status",
+              if (isTRUE(result$correct)) "Solved" else gm_status_text(rv$position)
+            ),
+            shiny::div(
+              class = "gm-meta mt-1",
+              paste0(
+                solved, " of ", total, " move", if (total == 1L) "" else "s",
+                " found  ·  theme ", rv$puzzle$theme,
+                "  ·  rating ", rv$puzzle$rating,
+                "  ·  ", rv$puzzle$id
+              )
+            )
           )
         },
-        error = function(e) NULL
+        error = function(e) gm_empty("No puzzle loaded.")
       )
     })
   })

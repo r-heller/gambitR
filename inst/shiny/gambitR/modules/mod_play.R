@@ -10,34 +10,30 @@ mod_play_ui <- function(id) {
         "notation."
       ),
       gm_picker(ns("side"), "Play as", c("White", "Black"), "White"),
-      shiny::sliderInput(ns("depth"), "Engine depth", min = 1L, max = 3L, value = 2L),
+      shiny::sliderInput(
+        ns("depth"), "Engine depth",
+        min = 1L, max = 3L, value = 2L, step = 1L, ticks = FALSE
+      ),
       gm_toggle(ns("flip"), "Flip board"),
       shiny::textInput(ns("san"), "Move", placeholder = "e4"),
       shiny::actionButton(ns("submit"), "Play move", class = "btn-primary w-100"),
       shiny::hr(),
-      shiny::actionButton(ns("new"), "New game", class = "w-100"),
-      shiny::actionButton(ns("resign"), "Resign", class = "w-100 mt-2")
+      shiny::actionButton(ns("new"), "New game", class = "btn-outline-secondary w-100"),
+      shiny::actionButton(
+        ns("resign"), "Resign",
+        class = "btn-outline-secondary w-100 mt-2"
+      )
     ),
     bslib::layout_columns(
       col_widths = c(7, 5),
-      bslib::card(
-        bslib::card_header("Board"),
-        shiny::plotOutput(ns("board"), click = ns("board_click"), height = "460px")
+      gm_board_card(
+        "Board", ns("board"),
+        click = ns("board_click"), height = "560px"
       ),
-      bslib::layout_columns(
-        col_widths = 12,
-        bslib::card(
-          bslib::card_header("Status"),
-          shiny::textOutput(ns("status"))
-        ),
-        bslib::card(
-          bslib::card_header("Moves"),
-          shiny::verbatimTextOutput(ns("moves"))
-        ),
-        bslib::card(
-          bslib::card_header("Engine"),
-          shiny::verbatimTextOutput(ns("engine"))
-        )
+      gm_stack(
+        gm_text_card("Status", shiny::uiOutput(ns("status"))),
+        gm_text_card("Moves", shiny::uiOutput(ns("moves"))),
+        gm_text_card("Engine", shiny::uiOutput(ns("engine")))
       )
     )
   )
@@ -110,7 +106,7 @@ mod_play_server <- function(id, store = NULL) {
       apply_move(best$san)
       rv$note <- paste0(
         "Engine played ", best$san, " (", round(best$score), " cp, ",
-        best$nodes, " nodes searched)."
+        format(best$nodes, big.mark = ","), " nodes searched)."
       )
       invisible(NULL)
     }
@@ -202,32 +198,53 @@ mod_play_server <- function(id, store = NULL) {
       if (nrow(hit)) c(hit$from[[1L]], hit$to[[1L]]) else NULL
     }
 
-    output$board <- shiny::renderPlot({
-      shiny::req(rv$position)
-      tryCatch(
+    output$board <- shiny::renderPlot(
+      {
+        shiny::req(rv$position)
         gm_safe_board(
           rv$position,
           highlight = c(rv$selected, last_move_squares()),
           flip = isTRUE(input$flip)
-        ),
-        error = function(e) NULL
-      )
-    })
+        )
+      },
+      res = 96
+    )
 
-    output$status <- shiny::renderText({
+    output$status <- shiny::renderUI({
       shiny::req(rv$position)
-      tryCatch(
-        if (rv$result != "*") paste0("Game over: ", rv$result) else gm_status_text(rv$position),
+      text <- tryCatch(
+        if (rv$result != "*") {
+          paste0("Game over — ", rv$result)
+        } else {
+          gm_status_text(rv$position)
+        },
         error = function(e) "-"
       )
+      shiny::tagList(
+        shiny::div(class = "gm-status", text),
+        shiny::div(
+          class = "gm-meta mt-1",
+          paste0(
+            "Move ", rv$position$fullmove, " · ",
+            length(rv$moves), " half-move", if (length(rv$moves) == 1L) "" else "s",
+            " played"
+          )
+        )
+      )
     })
 
-    output$moves <- shiny::renderText({
-      tryCatch(gm_movetext(rv$moves), error = function(e) "")
+    output$moves <- shiny::renderUI({
+      if (!length(rv$moves)) {
+        return(gm_empty("No moves yet — play e4 or click a piece."))
+      }
+      shiny::tags$pre(
+        class = "gm-scroll",
+        tryCatch(gm_movetext(rv$moves), error = function(e) "")
+      )
     })
 
-    output$engine <- shiny::renderText({
-      tryCatch(rv$note, error = function(e) "")
+    output$engine <- shiny::renderUI({
+      shiny::tags$pre(tryCatch(rv$note, error = function(e) ""))
     })
   })
 }

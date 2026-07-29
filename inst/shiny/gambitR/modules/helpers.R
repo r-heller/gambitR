@@ -84,8 +84,8 @@ gm_status_text <- function(position) {
   side <- if (position$turn == "w") "White" else "Black"
   winner <- if (position$turn == "w") "Black" else "White"
   switch(status,
-    checkmate = paste0("Checkmate — ", winner, " wins"),
-    stalemate = "Stalemate — draw",
+    checkmate = paste0("Checkmate: ", winner, " wins"),
+    stalemate = "Stalemate: draw",
     check = paste0(side, " to move (in check)"),
     paste0(side, " to move")
   )
@@ -96,17 +96,73 @@ gm_is_over <- function(position) {
 }
 
 # Every renderPlot in the app funnels through here so a transient bad state
-# shows an empty panel instead of an error.
+# shows an empty panel instead of an error. The app carries its own status
+# chrome, so the plot's own title, subtitle and FEN caption are dropped: at
+# panel size they are illegible and they duplicate the surrounding cards.
 gm_safe_board <- function(position, highlight = NULL, flip = FALSE) {
   tryCatch(
-    gambitR::gm_plot_board(position, highlight = highlight, flip = flip),
+    gambitR::gm_plot_board(position, highlight = highlight, flip = flip) +
+      ggplot2::labs(title = NULL, subtitle = NULL) +
+      ggplot2::theme(plot.margin = ggplot2::margin(2, 2, 2, 2)),
     error = function(e) NULL
   )
 }
 
+# The evaluation curve carries its own title, which would repeat the card
+# header it sits under; the subtitle keeps the unit.
+gm_safe_eval <- function(game) {
+  tryCatch(
+    gambitR::gm_plot_eval(game) + ggplot2::labs(title = NULL),
+    error = function(e) NULL
+  )
+}
+
+# A board panel: square, click-aware and hugging the plot. All five boards in
+# the app go through here so they are the same object on every tab.
+gm_board_output <- function(input_id, click = NULL, height = "520px") {
+  shiny::plotOutput(input_id, click = click, height = height)
+}
+
+# `...` takes anything that belongs under the board (a ply bar, a caption).
+# It sits before the optional arguments so that extra content can never be
+# matched positionally against `click`.
+gm_board_card <- function(title, input_id, ..., click = NULL, height = "520px") {
+  bslib::card(
+    class = "gm-board-card",
+    fill = FALSE,
+    bslib::card_header(title),
+    bslib::card_body(
+      gm_board_output(input_id, click = click, height = height),
+      ...
+    )
+  )
+}
+
+# Cards in this app hold either a plot that should fill or a short block of
+# text that should not stretch. Text cards opt out of filling.
+gm_text_card <- function(title, ..., min_height = NULL) {
+  bslib::card(
+    fill = FALSE,
+    min_height = min_height,
+    bslib::card_header(title),
+    bslib::card_body(...)
+  )
+}
+
+# A column of cards that hug their content and stack from the top, instead of
+# being stretched to equal heights by the surrounding grid.
+gm_stack <- function(...) {
+  shiny::div(class = "gm-stack", ...)
+}
+
+# Placeholder shown where a panel would otherwise render blank.
+gm_empty <- function(text) {
+  shiny::div(class = "gm-empty", text)
+}
+
 # plotly is optional: the chart is interactive when it is installed and a
 # plain ggplot otherwise.
-gm_chart_output <- function(input_id, height = "320px") {
+gm_chart_output <- function(input_id, height = "300px") {
   if (gm_have("plotly")) {
     plotly::plotlyOutput(input_id, height = height)
   } else {
@@ -118,10 +174,22 @@ gm_render_chart <- function(build) {
   if (gm_have("plotly")) {
     plotly::renderPlotly({
       plot <- build()
-      if (is.null(plot)) NULL else plotly::ggplotly(plot)
+      if (is.null(plot)) {
+        return(NULL)
+      }
+      # Two ggplotly warts to work around: it re-derives the legend from the
+      # fill scale and ignores `show.legend`, so the legend has to be switched
+      # off on the plotly object; and a custom `tooltip` on a bar chart makes
+      # it write a `mode` attribute that bar traces reject, so the hover text
+      # is left at plotly's own default. The modebar otherwise floats straight
+      # through the plot.
+      plotly::config(
+        plotly::layout(plotly::ggplotly(plot), showlegend = FALSE),
+        displayModeBar = FALSE
+      )
     })
   } else {
-    shiny::renderPlot(build())
+    shiny::renderPlot(build(), res = 96)
   }
 }
 
