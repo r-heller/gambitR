@@ -36,6 +36,11 @@
 # Row 1 is rank 8; column 1 is file a.
 .GM_ROW <- rep(1:8, each = 8L)
 .GM_COL <- rep(1:8, times = 8L)
+
+# Vertical reflection of the board: the square a white piece sees as `i` is
+# the square a black piece sees as `.GM_MIRROR[i]`. Used to evaluate both
+# sides against a single set of piece-square tables.
+.GM_MIRROR <- (8L - .GM_ROW) * 8L + .GM_COL
 .GM_RANK_CHR <- rep(as.character(8:1), each = 8L)
 .GM_FILE_CHR <- rep(letters[1:8], times = 8L)
 
