@@ -1,7 +1,7 @@
 Package: gambitR
 Title: Chess Engine, Analysis and Interactive Study Tools
 Version: 0.1.0
-Authors@R: person("Raban", "Heller", email = "raban.heller@charite.de",
+Authors@R: person("Raban", "Heller", email = "raban.heller@uni-ulm.de",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0001-8006-9742"))
 Description: A self-contained chess toolkit in native R. Provides legal move
     generation, game-state tracking and 'FEN'/'PGN' parsing, position
