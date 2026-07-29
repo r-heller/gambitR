@@ -1,0 +1,15 @@
+^gambitR\.Rproj$
+^\.Rproj\.user$
+^\.github$
+^_pkgdown\.ya?ml$
+^docs$
+^pkgdown$
+^README\.Rmd$
+^cran-comments\.md$
+^LICENSE\.md$
+^CLAUDE\.md$
+^CLAUDE_CODE_.*\.md$
+^\.claude$
+^codecov\.yml$
+^.*\.svg$
+^\.lintr$

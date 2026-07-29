@@ -1,0 +1,28 @@
+url: https://r-heller.github.io/gambitR/
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#5E2C8E"
+
+reference:
+- title: Core
+  contents: [gm_position, is_gm_position, gm_read_fen, gm_write_fen,
+             gm_legal_moves, gm_move, gm_status, is_gm_game]
+- title: Analysis
+  contents: [gm_evaluate, gm_bestmove, gm_uci_bestmove]
+- title: Play & Simulation
+  contents: [gm_play, gm_simulate]
+- title: Openings & Puzzles
+  contents: [gm_openings, gm_identify_opening, gm_puzzle, gm_check_solution]
+- title: Visualization
+  contents: [gm_plot_board, gm_plot_eval]
+- title: I/O
+  contents: [gm_read_pgn, gm_write_pgn]
+- title: Shiny
+  contents: [gm_run_app]
+
+articles:
+- title: Articles
+  navbar: ~
+  contents: [gambitR]

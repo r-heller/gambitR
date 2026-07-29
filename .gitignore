@@ -1,0 +1,13 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.DS_Store
+docs/
+inst/doc/
+.claude/
+CLAUDE.md
+
+# orchestration / build prompts - not part of the package
+.orchestration/
+CLAUDE_CODE_*.md

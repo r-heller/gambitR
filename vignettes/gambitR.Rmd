@@ -1,0 +1,52 @@
+---
+title: "Getting Started with gambitR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with gambitR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r setup}
+library(gambitR)
+```
+
+## A position
+
+Every workflow starts from a `gm_position`. The default is the standard
+starting position.
+
+```{r}
+pos <- gm_position()
+pos
+```
+
+## Legal moves
+
+```{r}
+gm_legal_moves(pos)
+```
+
+## Playing and simulating
+
+Pit two strategies against each other, or run a batch tournament.
+
+```{r eval = FALSE}
+game <- gm_play(white = "engine", black = "random")
+gm_simulate(white = "random", black = "random", n = 20)
+```
+
+## Analysis
+
+Static evaluation and engine search drive the analysis tools.
+
+```{r}
+gm_evaluate(pos)
+```
+
+See the other articles for the opening explorer, puzzle trainer, and the
+interactive Shiny application launched with `gm_run_app()`.
