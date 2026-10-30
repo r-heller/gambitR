@@ -13,7 +13,8 @@
 #' mate in one is preferred to a mate in three.
 #'
 #' @param position A [gm_position] object.
-#' @param depth Search depth in plies. Default `3`.
+#' @param depth Positive integer search depth in plies. Default `3`. The UCI
+#'   backend treats this as a maximum and also applies a one-second time limit.
 #' @param engine Backend: `"native"` (default, pure R minimax) or `"uci"` to
 #'   delegate to an external 'UCI' engine via [gm_uci_bestmove()].
 #' @param verbose If `TRUE` (default), report search progress.
@@ -33,12 +34,13 @@ gm_bestmove <- function(position, depth = 3L, engine = c("native", "uci"),
   if (!is_gm_position(position)) {
     cli::cli_abort("{.arg position} must be a {.cls gm_position} object.", call = call)
   }
-  if (!is.numeric(depth) || length(depth) != 1L || is.na(depth) || depth < 1) {
-    cli::cli_abort("{.arg depth} must be a single positive number.", call = call)
+  if (!is.numeric(depth) || length(depth) != 1L || !is.finite(depth) || depth < 1 ||
+      depth != trunc(depth) || depth > .Machine$integer.max) {
+    cli::cli_abort("{.arg depth} must be a single positive whole number.", call = call)
   }
   depth <- as.integer(depth)
   if (engine == "uci") {
-    info <- .gm_uci_query(position, verbose = verbose, call = call)
+    info <- .gm_uci_query(position, verbose = verbose, call = call, depth = depth)
     return(tibble::tibble(
       san = info$san, score = info$score,
       depth = info$depth, nodes = info$nodes

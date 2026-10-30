@@ -37,7 +37,7 @@ gm_uci_bestmove <- function(position, engine_path = NULL, movetime = 1000L,
 # backend of `gm_bestmove()` uses the depth and node counts as well.
 #' @noRd
 .gm_uci_query <- function(position, engine_path = NULL, movetime = 1000L,
-                          verbose = TRUE, call = rlang::caller_env()) {
+                          verbose = TRUE, call = rlang::caller_env(), depth = NULL) {
   if (!is_gm_position(position)) {
     cli::cli_abort("{.arg position} must be a {.cls gm_position} object.", call = call)
   }
@@ -47,9 +47,9 @@ gm_uci_bestmove <- function(position, engine_path = NULL, movetime = 1000L,
       "i" = "Install it with {.code install.packages('processx')}."
     ), call = call)
   }
-  if (!is.numeric(movetime) || length(movetime) != 1L || is.na(movetime) ||
-    movetime <= 0) {
-    cli::cli_abort("{.arg movetime} must be a single positive number.", call = call)
+  if (!is.numeric(movetime) || length(movetime) != 1L || !is.finite(movetime) ||
+    movetime <= 0 || movetime != trunc(movetime) || movetime > .Machine$integer.max) {
+    cli::cli_abort("{.arg movetime} must be a single positive whole number.", call = call)
   }
   engine_path <- engine_path %||% unname(Sys.which("stockfish"))
   if (!nzchar(engine_path)) {
@@ -110,8 +110,10 @@ gm_uci_bestmove <- function(position, engine_path = NULL, movetime = 1000L,
     cli::cli_abort("The engine did not reply {.code readyok}.", call = call)
   }
   say(paste0("position fen ", fen))
-  say(paste0("go movetime ", movetime))
-  output <- listen("^bestmove", movetime + 10000L)
+  command <- paste0("go movetime ", movetime)
+  if (!is.null(depth)) command <- paste(command, "depth", depth)
+  say(command)
+  output <- listen("^bestmove", as.double(movetime) + 10000)
 
   bestmove_line <- grep("^bestmove", output, value = TRUE)
   if (!length(bestmove_line)) {

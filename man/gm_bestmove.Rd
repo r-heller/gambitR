@@ -15,7 +15,8 @@ gm_bestmove(
 \arguments{
 \item{position}{A \link{gm_position} object.}
 
-\item{depth}{Search depth in plies. Default \code{3}.}
+\item{depth}{Positive integer search depth in plies. Default \code{3}. The UCI
+backend treats this as a maximum and also applies a one-second time limit.}
 
 \item{engine}{Backend: \code{"native"} (default, pure R minimax) or \code{"uci"} to
 delegate to an external 'UCI' engine via \code{\link[=gm_uci_bestmove]{gm_uci_bestmove()}}.}

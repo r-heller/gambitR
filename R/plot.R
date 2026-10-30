@@ -306,8 +306,9 @@ gm_plot_eval <- function(game, depth = 1L) {
   if (!is_gm_game(game)) {
     cli::cli_abort("{.arg game} must be a {.cls gm_game} object.")
   }
-  if (!is.numeric(depth) || length(depth) != 1L || is.na(depth) || depth < 1) {
-    cli::cli_abort("{.arg depth} must be a single positive number.")
+  if (!is.numeric(depth) || length(depth) != 1L || !is.finite(depth) || depth < 1 ||
+      depth != trunc(depth) || depth > .Machine$integer.max) {
+    cli::cli_abort("{.arg depth} must be a single positive whole number.")
   }
   depth <- as.integer(depth)
   positions <- game$positions

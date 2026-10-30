@@ -12,7 +12,7 @@ test_that("gm_simulate() returns a tidy result table", {
 test_that("gm_simulate() honours n", {
   res <- gm_simulate(n = 3, max_moves = 4, verbose = FALSE)
   expect_equal(nrow(res), 3L)
-  expect_error(gm_simulate(n = 0), "positive number")
+  expect_error(gm_simulate(n = 0), "positive whole number")
 })
 
 test_that("a random game terminates with a valid result", {
@@ -105,7 +105,7 @@ test_that("strategies are validated", {
   expect_error(gm_play(white = "psychic", verbose = FALSE), "Unknown strategy")
   expect_error(gm_play(white = 42, verbose = FALSE), "must be a function")
   expect_error(gm_play(position = "start"), class = "rlang_error")
-  expect_error(gm_play(max_moves = 0), "positive number")
+  expect_error(gm_play(max_moves = 0), "positive whole number")
   expect_error(
     gm_play(white = function(p) 42, black = "random", verbose = FALSE),
     "must return a single move"

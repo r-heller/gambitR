@@ -11,3 +11,6 @@
 ^.*\.svg$
 ^\.lintr$
 ^data-raw$
+
+^\.git$
+^MAINTENANCE\.md$

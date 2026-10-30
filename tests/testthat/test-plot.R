@@ -228,6 +228,6 @@ test_that("gm_plot_eval() validates its arguments", {
   expect_error(gm_plot_eval(gm_position()), class = "rlang_error")
   expect_error(
     gm_plot_eval(gm_read_pgn("1. e4 *", text = TRUE), depth = 0),
-    "positive number"
+    "positive whole number"
   )
 })

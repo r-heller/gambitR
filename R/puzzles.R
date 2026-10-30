@@ -36,7 +36,19 @@
 #'
 #' gm_puzzle(id = "gm-0001")$solution
 gm_puzzle <- function(id = NULL, theme = NULL, seed = NULL) {
-  if (!is.null(seed)) withr_local_seed(seed)
+  if (!is.null(seed)) {
+    if (!is.numeric(seed) || length(seed) != 1L || !is.finite(seed) ||
+        seed != trunc(seed) || abs(seed) > .Machine$integer.max)
+      cli::cli_abort("{.arg seed} must be a single whole number.")
+    had_seed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+    old_seed <- if (had_seed) get(".Random.seed", envir = .GlobalEnv) else NULL
+    on.exit({
+      if (had_seed) assign(".Random.seed", old_seed, envir = .GlobalEnv)
+      else if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+        rm(".Random.seed", envir = .GlobalEnv)
+    }, add = TRUE)
+    set.seed(seed)
+  }
   set <- .gm_puzzle_set()
   if (nrow(set) == 0L) {
     cli::cli_abort("The bundled puzzle set could not be loaded.")
@@ -134,13 +146,4 @@ gm_check_solution <- function(puzzle, moves) {
     solved_plies = matched,
     total_plies = as.integer(total)
   )
-}
-
-#' @noRd
-withr_local_seed <- function(seed, .local_envir = parent.frame()) {
-  if (requireNamespace("withr", quietly = TRUE)) {
-    withr::local_seed(seed, .local_envir = .local_envir)
-  } else {
-    set.seed(seed)
-  }
 }

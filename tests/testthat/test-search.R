@@ -63,7 +63,7 @@ test_that("a finished position yields no move", {
 
 test_that("gm_bestmove() validates its arguments", {
   expect_error(gm_bestmove("start"), class = "rlang_error")
-  expect_error(gm_bestmove(gm_position(), depth = 0), "positive number")
+  expect_error(gm_bestmove(gm_position(), depth = 0), "positive whole number")
   expect_error(gm_bestmove(gm_position(), engine = "magic"), class = "rlang_error")
 })
 
@@ -156,6 +156,6 @@ test_that("gm_uci_bestmove() validates its arguments", {
   expect_error(gm_uci_bestmove("start"), class = "rlang_error")
   expect_error(
     gm_uci_bestmove(gm_position(), engine_path = "x", movetime = -1),
-    "positive number"
+    "positive whole number"
   )
 })

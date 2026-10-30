@@ -1,6 +1,6 @@
 # A minimal stand-in for a 'UCI' engine, so the client half of the protocol
 # can be exercised without depending on an external binary being installed.
-gm_fake_engine <- function(envir = parent.frame()) {
+gm_fake_engine <- function(envir = parent.frame(), transcript = NULL) {
   testthat::skip_on_os("windows")
   testthat::skip_if_not_installed("processx")
   testthat::skip_if_not_installed("withr")
@@ -8,6 +8,7 @@ gm_fake_engine <- function(envir = parent.frame()) {
   writeLines(c(
     "#!/bin/sh",
     "while IFS= read -r line; do",
+    if (!is.null(transcript)) paste0("  printf '%s\\n' \"$line\" >> ", shQuote(transcript)),
     "  case \"$line\" in",
     "    uci) echo 'id name fakefish'; echo 'uciok' ;;",
     "    isready) echo 'readyok' ;;",

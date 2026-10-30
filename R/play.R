@@ -33,9 +33,9 @@ gm_play <- function(white = "engine", black = "engine", position = NULL,
   if (!is_gm_position(position)) {
     cli::cli_abort("{.arg position} must be a {.cls gm_position} object.")
   }
-  if (!is.numeric(max_moves) || length(max_moves) != 1L || is.na(max_moves) ||
-    max_moves < 1) {
-    cli::cli_abort("{.arg max_moves} must be a single positive number.")
+  if (!is.numeric(max_moves) || length(max_moves) != 1L || !is.finite(max_moves) ||
+    max_moves < 1 || max_moves != trunc(max_moves) || max_moves > .Machine$integer.max) {
+    cli::cli_abort("{.arg max_moves} must be a single positive whole number.")
   }
   max_moves <- as.integer(max_moves)
   players <- list(
@@ -71,7 +71,7 @@ gm_play <- function(white = "engine", black = "engine", position = NULL,
       termination <- "threefold"
       break
     }
-    if (length(moves) >= 2L * max_moves) {
+    if (length(moves) >= 2 * as.double(max_moves)) {
       termination <- "move limit"
       break
     }
@@ -157,10 +157,13 @@ gm_play <- function(white = "engine", black = "engine", position = NULL,
 # passant square, exactly as the threefold rule requires.
 #' @noRd
 .gm_repetition_key <- function(position) {
-  paste(
-    paste(position$board, collapse = ""), position$turn,
-    position$castling, if (is.na(position$ep)) "-" else position$ep
-  )
+  # FIDE 9.2.3: an en-passant target distinguishes positions only when
+  # a legal capture is available, including the king-safety restriction.
+  ep <- "-"
+  if (!is.na(position$ep) && any(.gm_gen_legal(.gm_state(position))$flag == 3L))
+    ep <- position$ep
+  paste(paste(position$board, collapse = ""), position$turn,
+        position$castling, ep)
 }
 
 # King versus king, and king and a single minor piece versus king, cannot be
@@ -195,8 +198,9 @@ gm_play <- function(white = "engine", black = "engine", position = NULL,
 #' }
 gm_simulate <- function(white = "random", black = "random", n = 10L,
                         max_moves = 200L, verbose = TRUE) {
-  if (!is.numeric(n) || length(n) != 1L || is.na(n) || n < 1) {
-    cli::cli_abort("{.arg n} must be a single positive number.")
+  if (!is.numeric(n) || length(n) != 1L || !is.finite(n) || n < 1 ||
+      n != trunc(n) || n > .Machine$integer.max) {
+    cli::cli_abort("{.arg n} must be a single positive whole number.")
   }
   n <- as.integer(n)
   result <- character(n)

@@ -14,32 +14,9 @@ hook (e.g. Stockfish) enables deeper analysis.
 
 ## Why gambitR?
 
-Several R chess packages already exist, each with a different focus. `gambitR`
-is the only one that combines native (dependency-free) move generation with
-play, simulation, an opening explorer, a puzzle trainer, and a full interactive
-study app in one package.
-
-| Feature | gambitR | chess | rchess | chess2plyrs |
-|---|:--:|:--:|:--:|:--:|
-| Native R move generation (no wrapper) | ✅ | ❌ (python-chess) | ❌ (chess.js) | ✅ |
-| FEN / PGN read & write | ✅ | ✅ | ✅ | ✅ (FEN) |
-| Legality / check / mate detection | ✅ | ✅ | ✅ | ✅ |
-| Built-in engine (search) | ✅ minimax + alpha-beta | ❌ | ❌ | ✅ minimax |
-| Optional UCI / Stockfish hook | ✅ | ❌ | ❌ | ❌ |
-| Batch strategy simulation | ✅ | ❌ | ❌ | ❌ |
-| Opening explorer (ECO) | ✅ | ❌ | ❌ | ❌ |
-| Puzzle trainer | ✅ | ❌ | ❌ | ❌ |
-| ggplot2 board & eval plots | ✅ | partial | ✅ | ✅ (base) |
-| Interactive Shiny study app | ✅ (6 tabs) | ❌ | ❌ | ❌ |
-| No system/JS runtime required | ✅ | ❌ (Python) | ❌ (JS) | ✅ |
-
-If you mainly want to parse and explore existing PGNs as trees, `chess` is
-excellent and purpose-built for that. `gambitR` targets play, analysis,
-simulation and study in a single native-R package.
-
-Move generation, PGN parsing and the UCI client are implemented from the public
-FEN/PGN/UCI specifications and perft references — not ported from any existing
-(GPL) codebase.
+`gambitR` combines native R move generation with play, simulation, an opening
+explorer, a puzzle trainer, and an interactive study app. Move generation does
+not require an external chess engine; UCI analysis is optional.
 
 ## Installation
 
@@ -80,9 +57,9 @@ gm_run_app()
 ## Correctness
 
 Move generation is verified against the published
-[perft](https://www.chessprogramming.org/Perft) reference counts, which is the
-standard way to prove a generator handles castling rights, en passant, pinned
-pieces and promotion exactly:
+[perft](https://www.chessprogramming.org/Perft) reference counts, with
+regression checks for castling rights, en passant, pinned pieces and promotion.
+These reference positions do not constitute an exhaustive proof:
 
 | Position | Depth 1 | Depth 2 | Depth 3 | Depth 4 |
 |---|--:|--:|--:|--:|
@@ -94,3 +71,8 @@ pieces and promotion exactly:
 
 These run as part of the test suite; depths 1 and 2 run everywhere, deeper
 counts are skipped on CRAN for time.
+
+## Local maintenance candidate
+
+See [MAINTENANCE.md](MAINTENANCE.md) for the 30 October 2026 repairs, exact local
+installation path, verification results and remaining release limits.
