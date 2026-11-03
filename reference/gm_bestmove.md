@@ -26,7 +26,8 @@ gm_bestmove(
 
 - depth:
 
-  Search depth in plies. Default `3`.
+  Positive integer search depth in plies. Default `3`. The UCI backend
+  treats this as a maximum and also applies a one-second time limit.
 
 - engine:
 

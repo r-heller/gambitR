@@ -72,104 +72,7 @@
 <div class="section level2">
 <h2 id="why-gambitr">Why gambitR?<a class="anchor" aria-label="anchor" href="#why-gambitr"></a>
 </h2>
-<p>Several R chess packages already exist, each with a different focus. <code>gambitR</code> is the only one that combines native (dependency-free) move generation with play, simulation, an opening explorer, a puzzle trainer, and a full interactive study app in one package.</p>
-<table class="table">
-<colgroup>
-<col width="15%">
-<col width="21%">
-<col width="21%">
-<col width="21%">
-<col width="21%">
-</colgroup>
-<thead><tr>
-<th>Feature</th>
-<th align="center">gambitR</th>
-<th align="center">chess</th>
-<th align="center">rchess</th>
-<th align="center">chess2plyrs</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Native R move generation (no wrapper)</td>
-<td align="center">✅</td>
-<td align="center">❌ (python-chess)</td>
-<td align="center">❌ (chess.js)</td>
-<td align="center">✅</td>
-</tr>
-<tr>
-<td>FEN / PGN read &amp; write</td>
-<td align="center">✅</td>
-<td align="center">✅</td>
-<td align="center">✅</td>
-<td align="center">✅ (FEN)</td>
-</tr>
-<tr>
-<td>Legality / check / mate detection</td>
-<td align="center">✅</td>
-<td align="center">✅</td>
-<td align="center">✅</td>
-<td align="center">✅</td>
-</tr>
-<tr>
-<td>Built-in engine (search)</td>
-<td align="center">✅ minimax + alpha-beta</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-<td align="center">✅ minimax</td>
-</tr>
-<tr>
-<td>Optional UCI / Stockfish hook</td>
-<td align="center">✅</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-</tr>
-<tr>
-<td>Batch strategy simulation</td>
-<td align="center">✅</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-</tr>
-<tr>
-<td>Opening explorer (ECO)</td>
-<td align="center">✅</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-</tr>
-<tr>
-<td>Puzzle trainer</td>
-<td align="center">✅</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-</tr>
-<tr>
-<td>ggplot2 board &amp; eval plots</td>
-<td align="center">✅</td>
-<td align="center">partial</td>
-<td align="center">✅</td>
-<td align="center">✅ (base)</td>
-</tr>
-<tr>
-<td>Interactive Shiny study app</td>
-<td align="center">✅ (6 tabs)</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-</tr>
-<tr>
-<td>No system/JS runtime required</td>
-<td align="center">✅</td>
-<td align="center">❌ (Python)</td>
-<td align="center">❌ (JS)</td>
-<td align="center">✅</td>
-</tr>
-</tbody>
-</table>
-<p>If you mainly want to parse and explore existing PGNs as trees, <code>chess</code> is excellent and purpose-built for that. <code>gambitR</code> targets play, analysis, simulation and study in a single native-R package.</p>
-<p>Move generation, PGN parsing and the UCI client are implemented from the public FEN/PGN/UCI specifications and perft references — not ported from any existing (GPL) codebase.</p>
+<p><code>gambitR</code> combines native R move generation with play, simulation, an opening explorer, a puzzle trainer, and an interactive study app. Move generation does not require an external chess engine; UCI analysis is optional.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -210,7 +113,7 @@
 <div class="section level2">
 <h2 id="correctness">Correctness<a class="anchor" aria-label="anchor" href="#correctness"></a>
 </h2>
-<p>Move generation is verified against the published <a href="https://www.chessprogramming.org/Perft" class="external-link">perft</a> reference counts, which is the standard way to prove a generator handles castling rights, en passant, pinned pieces and promotion exactly:</p>
+<p>Move generation is verified against the published <a href="https://www.chessprogramming.org/Perft" class="external-link">perft</a> reference counts, with regression checks for castling rights, en passant, pinned pieces and promotion. These reference positions do not constitute an exhaustive proof:</p>
 <table class="table">
 <thead><tr>
 <th>Position</th>
@@ -258,6 +161,11 @@
 </tbody>
 </table>
 <p>These run as part of the test suite; depths 1 and 2 run everywhere, deeper counts are skipped on CRAN for time.</p>
+</div>
+<div class="section level2">
+<h2 id="local-maintenance-candidate">Local maintenance candidate<a class="anchor" aria-label="anchor" href="#local-maintenance-candidate"></a>
+</h2>
+<p>See <a href="MAINTENANCE.html">MAINTENANCE.md</a> for the 30 October 2026 repairs, exact local installation path, verification results and remaining release limits.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
