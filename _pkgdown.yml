@@ -1,6 +1,9 @@
 url: https://r-heller.github.io/gambitR/
 
 template:
+  includes:
+    in_header: |
+      <script defer data-domain="r-heller.github.io/gambitr" src="https://analytics.hellebo.de/js/script.file-downloads.outbound-links.js"></script>
   bootstrap: 5
   bslib:
     primary: "#5E2C8E"
