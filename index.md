@@ -1,4 +1,4 @@
-# gambitR
+# gambitR ![gambitR logo](reference/figures/logo.png)
 
 A self-contained chess toolkit in native R: legal move generation,
 FEN/PGN I/O, position evaluation and alpha-beta search, batch
