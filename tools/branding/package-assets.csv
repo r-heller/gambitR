@@ -1,0 +1,6 @@
+rendered,destination
+lockup.png,inst/shiny/gambitR/www/logo.png
+lockup-dark.png,man/figures/logo-dark.png
+lockup-dark.svg,man/figures/logo-dark.svg
+lockup.png,man/figures/logo.png
+lockup.svg,man/figures/logo.svg
