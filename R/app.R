@@ -10,8 +10,8 @@
 #' @export
 #' @family shiny
 #' @examples
-#' \dontrun{
-#' gm_run_app()
+#' if (interactive()) {
+#'   gm_run_app()
 #' }
 gm_run_app <- function(...) {
   for (pkg in c("shiny", "bslib")) {

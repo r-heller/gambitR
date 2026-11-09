@@ -1,3 +1,19 @@
+# gambitR 0.2.0
+
+## CRAN preparation
+
+* The 'UCI' example now runs only when 'processx' and a `stockfish` binary are
+  available, without calling unexported functions.
+* `gm_run_app()` example is wrapped in `if (interactive())` instead of
+  `\dontrun{}`.
+* Package help page uses the vector logo, which is now shipped in the source
+  package; the build no longer leaves an empty `tools/` directory behind.
+* Repetition identity ignores an en-passant target when no legal en-passant
+  capture exists (FIDE 9.2.3); the 'UCI' backend of `gm_bestmove()` forwards
+  `depth`; non-finite and fractional counts are rejected before any work starts;
+  seeded puzzles restore the caller's random number generator state.
+* README links to the maintenance record by absolute URL.
+
 # gambitR 0.1.0
 
 ## Initial release

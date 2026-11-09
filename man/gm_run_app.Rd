@@ -19,8 +19,8 @@ tournaments), Openings (ECO explorer), Puzzles (tactical trainer) and Study
 (annotate and save games).
 }
 \examples{
-\dontrun{
-gm_run_app()
+if (interactive()) {
+  gm_run_app()
 }
 }
 \concept{shiny}

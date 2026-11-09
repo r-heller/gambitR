@@ -21,7 +21,7 @@
 #'   (principal variation string). One row.
 #' @export
 #' @family analysis
-#' @examplesIf gambitR:::.gm_has_uci()
+#' @examplesIf requireNamespace("processx", quietly = TRUE) && nzchar(Sys.which("stockfish"))
 #' gm_uci_bestmove(gm_position())
 gm_uci_bestmove <- function(position, engine_path = NULL, movetime = 1000L,
                             verbose = TRUE, call = rlang::caller_env()) {

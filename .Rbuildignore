@@ -1,5 +1,6 @@
 ^gambitR\.Rproj$
 ^\.Rproj\.user$
+^\.git$
 ^\.github$
 ^_pkgdown\.ya?ml$
 ^docs$
@@ -8,12 +9,14 @@
 ^cran-comments\.md$
 ^LICENSE\.md$
 ^codecov\.yml$
-^.*\.svg$
+^man/figures/logo-dark\.svg$
 ^\.lintr$
 ^data-raw$
-
-^\.git$
 ^MAINTENANCE\.md$
-
-^tools/branding$
-^tools/draw-logo\.R$
+^ROADMAP\.md$
+^VALIDATION\.md$
+^CITATION\.cff$
+^codemeta\.json$
+^\.zenodo\.json$
+^tools$
+^revdep$

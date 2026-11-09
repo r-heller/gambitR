@@ -73,5 +73,5 @@ counts are skipped on CRAN for time.
 
 ## Local maintenance candidate
 
-See [MAINTENANCE.md](MAINTENANCE.md) for the 30 October 2026 repairs, exact local
+See [MAINTENANCE.md](https://github.com/r-heller/gambitR/blob/main/MAINTENANCE.md) for the 30 October 2026 repairs, exact local
 installation path, verification results and remaining release limits.

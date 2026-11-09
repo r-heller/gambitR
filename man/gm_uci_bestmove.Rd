@@ -42,7 +42,7 @@ until \code{bestmove}. Scores are reported from White's perspective, matching
 the call errors.
 }
 \examples{
-\dontshow{if (gambitR:::.gm_has_uci()) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("processx", quietly = TRUE) && nzchar(Sys.which("stockfish"))) withAutoprint(\{ # examplesIf}
 gm_uci_bestmove(gm_position())
 \dontshow{\}) # examplesIf}
 }
