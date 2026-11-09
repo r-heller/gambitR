@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">gambitR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,18 @@
       <small>Source: <a href="https://github.com/r-heller/gambitR/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="gambitr-020">gambitR 0.2.0<a class="anchor" aria-label="anchor" href="#gambitr-020"></a></h2>
+<div class="section level3">
+<h3 id="cran-preparation-0-2-0">CRAN preparation<a class="anchor" aria-label="anchor" href="#cran-preparation-0-2-0"></a></h3>
+<ul><li>The ‘UCI’ example now runs only when ‘processx’ and a <code>stockfish</code> binary are available, without calling unexported functions.</li>
+<li>
+<code><a href="../reference/gm_run_app.html">gm_run_app()</a></code> example is wrapped in <code>if (interactive())</code> instead of <code>\dontrun{}</code>.</li>
+<li>Package help page uses the vector logo, which is now shipped in the source package; the build no longer leaves an empty <code>tools/</code> directory behind.</li>
+<li>Repetition identity ignores an en-passant target when no legal en-passant capture exists (FIDE 9.2.3); the ‘UCI’ backend of <code><a href="../reference/gm_bestmove.html">gm_bestmove()</a></code> forwards <code>depth</code>; non-finite and fractional counts are rejected before any work starts; seeded puzzles restore the caller’s random number generator state.</li>
+<li>README links to the maintenance record by absolute URL.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="gambitr-010">gambitR 0.1.0<a class="anchor" aria-label="anchor" href="#gambitr-010"></a></h2>
 <div class="section level3">

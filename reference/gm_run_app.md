@@ -25,7 +25,7 @@ Invisible `NULL`. Launches a 'Shiny' application in the browser.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-gm_run_app()
-} # }
+if (interactive()) {
+  gm_run_app()
+}
 ```

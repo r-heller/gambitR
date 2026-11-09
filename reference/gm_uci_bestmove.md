@@ -67,7 +67,7 @@ Other analysis:
 ## Examples
 
 ``` r
-if (FALSE) { # gambitR:::.gm_has_uci()
+if (FALSE) { # requireNamespace("processx", quietly = TRUE) && nzchar(Sys.which("stockfish"))
 gm_uci_bestmove(gm_position())
 }
 ```
