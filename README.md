@@ -1,5 +1,4 @@
-# gambitR <img src="man/figures/logo.png" align="right" height="139" alt="gambitR logo" />
-
+# gambitR <picture class="cttir-readme-logo"><source class="cttir-logo-dark-source" media="(prefers-color-scheme: dark)" srcset="man/figures/logo-dark.png" /><img src="man/figures/logo.png" align="right" alt="gambitR logo" width="120" height="139" /></picture>
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/r-heller/gambitR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/r-heller/gambitR/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/r-heller/gambitR/branch/main/graph/badge.svg)](https://app.codecov.io/gh/r-heller/gambitR?branch=main)
